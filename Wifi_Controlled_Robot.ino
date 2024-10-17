@@ -1,22 +1,16 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-// Replace with your network credentials
 const char* ssid     = "Orange-21A5";
-const char* password = "FB3696Q4BQD";
+const char* password = "FB369djhqkjd";
 
-// Create an instance of the WebServer on port 80
 WebServer server(80);
-
-// Motor 1
-int motor1Pin1 = 27;
-int motor1Pin2 = 26;
-// Motor 2
-int motor2Pin1 = 33;
-int motor2Pin2 = 16;  // Changed from 34 to 25 (valid GPIO for output)
-
-int enA = 14;  // Enable pin for Motor 1
-int enB = 32;  // Enable pin for Motor 2
+int motor1_fw = 27;
+int motor1_bw = 26;
+int motor2_fw = 33;
+int motor2_bw = 16;  
+int motor1_speed = 14; 
+int motor2_speed = 32;  
 
 void handleRoot() {
   const char html[] PROGMEM = R"rawliteral(
@@ -26,7 +20,7 @@ void handleRoot() {
     <link rel="icon" href="data:,">
     <style>
       html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; }
-      .button { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #4CAF50; border: none; color: white; padding: 12px 28px; text-decoration: none; font-size: 26px; margin: 1px; cursor: pointer; }
+      .button { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; background-color: #FF0000; border: none; color: white; padding: 12px 28px; text-decoration: none; font-size: 26px; margin: 1px; cursor: pointer; }
       .button2 {background-color: #555555;}
     </style>
     <script>
@@ -55,78 +49,72 @@ void handleRoot() {
 
 void handleForward() {
   Serial.println("Forward");
-  digitalWrite(enA, HIGH);  // Enable Motor 1
-  digitalWrite(enB, HIGH);  // Enable Motor 2
-  
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, HIGH); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
+  digitalWrite(motor1_speed, HIGH); 
+  digitalWrite(motor2_speed, HIGH);  
+  digitalWrite(motor1_fw, LOW);
+  digitalWrite(motor1_bw, HIGH); 
+  digitalWrite(motor2_fw, LOW);
+  digitalWrite(motor2_bw, HIGH);
   server.send(200);
 }
 
 void handleLeft() {
   Serial.println("Left");
-  digitalWrite(enA, HIGH);  // Enable Motor 1
-  digitalWrite(enB, HIGH);  // Enable Motor 2
+  digitalWrite(motor1_speed, HIGH);  
+  digitalWrite(motor2_speed, HIGH); 
   
-  digitalWrite(motor1Pin1, LOW); 
-  digitalWrite(motor1Pin2, LOW); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
+  digitalWrite(motor1_fw, LOW); 
+  digitalWrite(motor1_bw, LOW); 
+  digitalWrite(motor2_fw, LOW);
+  digitalWrite(motor2_bw, HIGH);
   server.send(200);
 }
 
 void handleStop() {
   Serial.println("Stop");
-  digitalWrite(enA, LOW);  // Disable Motor 1
-  digitalWrite(enB, LOW);  // Disable Motor 2
+  digitalWrite(motor1_speed, LOW);  
+  digitalWrite(motor2_speed, LOW);  
   
-  digitalWrite(motor1Pin1, LOW); 
-  digitalWrite(motor1Pin2, LOW); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);   
+  digitalWrite(motor1_fw, LOW); 
+  digitalWrite(motor1_bw, LOW); 
+  digitalWrite(motor2_fw, LOW);
+  digitalWrite(motor2_bw, LOW);   
   server.send(200);
 }
 
 void handleRight() {
   Serial.println("Right");
-  digitalWrite(enA, HIGH);  // Enable Motor 1
-  digitalWrite(enB, HIGH);  // Enable Motor 2
+  digitalWrite(motor1_speed, HIGH);  
+  digitalWrite(motor2_speed, HIGH);  
   
-  digitalWrite(motor1Pin1, LOW); 
-  digitalWrite(motor1Pin2, HIGH); 
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);    
+  digitalWrite(motor1_fw, LOW); 
+  digitalWrite(motor1_bw, HIGH); 
+  digitalWrite(motor2_fw, LOW);
+  digitalWrite(motor2_bw, LOW);    
   server.send(200);
 }
 
 void handleReverse() {
   Serial.println("Reverse");
-  digitalWrite(enA, HIGH);  // Enable Motor 1
-  digitalWrite(enB, HIGH);  // Enable Motor 2
+  digitalWrite(motor1_speed, HIGH); 
+  digitalWrite(motor2_speed, HIGH);  
   
-  digitalWrite(motor1Pin1, HIGH);
-  digitalWrite(motor1Pin2, LOW); 
-  digitalWrite(motor2Pin1, HIGH);
-  digitalWrite(motor2Pin2, LOW);          
+  digitalWrite(motor1_fw, HIGH);
+  digitalWrite(motor1_bw, LOW); 
+  digitalWrite(motor2_fw, HIGH);
+  digitalWrite(motor2_bw, LOW);          
   server.send(200);
 }
 
 void setup() {
   Serial.begin(115200);
+  pinMode(motor1_fw, OUTPUT);
+  pinMode(motor1_bw, OUTPUT);
+  pinMode(motor2_fw, OUTPUT);
+  pinMode(motor2_bw, OUTPUT);
+  pinMode(motor1_speed, OUTPUT);
+  pinMode(motor2_speed, OUTPUT);
 
-  // Set the Motor pins as outputs
-  pinMode(motor1Pin1, OUTPUT);
-  pinMode(motor1Pin2, OUTPUT);
-  pinMode(motor2Pin1, OUTPUT);
-  pinMode(motor2Pin2, OUTPUT);
-  
-  // Set the enable pins as outputs
-  pinMode(enA, OUTPUT);
-  pinMode(enB, OUTPUT);
-
-  // Connect to Wi-Fi
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
@@ -138,8 +126,6 @@ void setup() {
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
-  // Define routes
   server.on("/", handleRoot);
   server.on("/forward", handleForward);
   server.on("/left", handleLeft);
@@ -147,7 +133,6 @@ void setup() {
   server.on("/right", handleRight);
   server.on("/reverse", handleReverse);
 
-  // Start the server
   server.begin();
 }
 
